@@ -48,4 +48,13 @@ if [[ -z "$ENTRY" ]] || [[ ! -f "$ENTRY" ]]; then
   bashio::log.error "Importer entry not found"
   exit 1
 fi
-exec /usr/bin/node "$ENTRY"
+
+# Ensure config file exists so the importer doesn't exit silently
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  bashio::log.error "Config file not found: ${CONFIG_FILE}"
+  bashio::log.error "Create the config file (or set config_file in addon options) and ensure it contains 'firefly' and 'banks'."
+  exit 1
+fi
+
+bashio::log.info "Running importer: node ${ENTRY}"
+exec /usr/bin/node "$ENTRY" 2>&1
