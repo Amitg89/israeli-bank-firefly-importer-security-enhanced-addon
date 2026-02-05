@@ -28,5 +28,24 @@ bashio::log.info "Config file: ${CONFIG_FILE}"
 bashio::log.info "Firefly URL: ${FIREFLY_BASE_URL}"
 bashio::log.info "Cron schedule: ${CRON}"
 
-# Run the importer via node (avoids permission issues with npm global bin)
-exec /usr/bin/node /usr/local/lib/node_modules/israeli-bank-firefly-importer/src/index.js
+# Run the importer via node - use path recorded at build time, or discover
+ENTRY=""
+if [[ -f /app/IMPORTER_ENTRY ]]; then
+  read -r ENTRY < /app/IMPORTER_ENTRY
+  [[ -f "$ENTRY" ]] || ENTRY=""
+fi
+if [[ -z "$ENTRY" ]]; then
+  NODE_MODULES="/usr/local/lib/node_modules"
+  for dir in "${NODE_MODULES}"/israeli-bank-firefly-importer*; do
+    [[ -d "$dir" ]] || continue
+    if [[ -f "${dir}/src/index.js" ]]; then
+      ENTRY="${dir}/src/index.js"
+      break
+    fi
+  done
+fi
+if [[ -z "$ENTRY" ]] || [[ ! -f "$ENTRY" ]]; then
+  bashio::log.error "Importer entry not found"
+  exit 1
+fi
+exec /usr/bin/node "$ENTRY"
