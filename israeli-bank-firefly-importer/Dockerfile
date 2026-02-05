@@ -1,8 +1,8 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install Node.js, npm, Chromium for Puppeteer, and git for npm install from GitHub
-RUN apk add --no-cache nodejs npm chromium git
+# Install Node.js, npm, and Chromium for Puppeteer
+RUN apk add --no-cache nodejs npm chromium
 
 # Configure Puppeteer to use system Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
@@ -14,9 +14,11 @@ WORKDIR /app
 COPY run.sh /
 RUN chmod a+x /run.sh
 
-# Install the security-enhanced importer from the GitHub repo
-# Note: Update this when the package is published to npm
-RUN npm i -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git
+# Install git and the security-enhanced importer in same layer
+# This ensures git is available for npm to clone from GitHub
+RUN apk add --no-cache git \
+    && npm i -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git \
+    && apk del git
 
 # Add non-root user for security (no --no-sandbox needed)
 RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
