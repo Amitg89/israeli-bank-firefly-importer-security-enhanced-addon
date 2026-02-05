@@ -44,6 +44,8 @@ banks:
 scraper:
   parallel: true
   timeout: 60000
+  # Optional: limit how far back to scrape (ISO date)
+  # startDate: '2021-01-01'
   args:
     - '--disable-dev-shm-usage'
     - '--disable-setuid-sandbox'
