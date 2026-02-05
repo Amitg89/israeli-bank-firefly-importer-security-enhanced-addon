@@ -12,7 +12,6 @@ ADDON_DIR="israeli-bank-firefly-importer"
 export BUILD_FROM="${BUILD_FROM:-ghcr.io/home-assistant/amd64-base:latest}"
 
 echo "Building with BUILD_FROM=$BUILD_FROM"
-# Use NO_CACHE=1 to force a fresh clone (e.g. after pushing importer fixes)
 if [[ -n "$NO_CACHE" ]]; then
   echo "NO_CACHE is set: doing a full rebuild (no cache)"
 else
@@ -27,24 +26,19 @@ docker build \
   "$ADDON_DIR"
 
 echo ""
-echo "Build succeeded. Verifying importer entry..."
-ENTRY=$(docker run --rm israeli-bank-firefly-importer-security-enhanced:test cat /app/IMPORTER_ENTRY 2>/dev/null || true)
-if [[ -n "$ENTRY" ]]; then
-  echo "IMPORTER_ENTRY=$ENTRY"
+echo "Build succeeded. Verifying importer..."
+if docker run --rm israeli-bank-firefly-importer-security-enhanced:test test -f /app/importer/src/index.js; then
+  echo "Importer entry /app/importer/src/index.js found."
   echo ""
-  echo "Entry point found. Run full test? (docker run --rm ... /run.sh)"
   echo "To run with your config locally (see real errors):"
   echo "  mkdir -p test-config && cp /path/to/config.encrypted.yaml test-config/"
-  echo "  docker run --rm -it --entrypoint \"\" -v \$(pwd)/test-config:/config/israeli-bank-firefly-importer:ro \\"
+  echo "  docker run --rm -it -v \$(pwd)/test-config:/config/israeli-bank-firefly-importer:ro \\"
   echo "    -e CONFIG_FILE=/config/israeli-bank-firefly-importer/config.encrypted.yaml \\"
-  echo "    -e FIREFLY_BASE_URL=http://host.docker.internal:3473 -e FIREFLY_TOKEN_API=x -e MASTER_PASSWORD=xxx -e CRON='0 6 * * *' -e LOG_LEVEL=info \\"
-  echo "    israeli-bank-firefly-importer-security-enhanced:test \\"
-  echo "    /bin/sh -c 'cd /app/importer && node src/index.js'"
-  echo "  (--entrypoint \"\" is required so -e env vars reach the process)"
+  echo "    -e FIREFLY_BASE_URL=http://host.docker.internal:3473 -e FIREFLY_TOKEN_API=x \\"
+  echo "    -e MASTER_PASSWORD=xxx -e CRON='0 6 * * *' -e LOG_LEVEL=info \\"
+  echo "    israeli-bank-firefly-importer-security-enhanced:test /run.sh"
   echo "  See TESTING.md for details."
 else
-  echo "WARNING: /app/IMPORTER_ENTRY is empty or missing."
-  echo "Listing /usr/local/lib/node_modules:"
-  docker run --rm israeli-bank-firefly-importer-security-enhanced:test ls -la /usr/local/lib/node_modules/ 2>/dev/null || true
+  echo "WARNING: /app/importer/src/index.js not found."
   exit 1
 fi

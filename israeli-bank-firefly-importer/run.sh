@@ -1,8 +1,8 @@
 #!/usr/bin/with-contenv bashio
 set -e
 
-# Version marker to confirm the addon image is updated
-bashio::log.info "run.sh version 1.0.14"
+# Log immediately so we always have output if the addon runs (helps debug "start and stop with no logs")
+bashio::log.info "Israeli Bank Firefly III Importer (Security Enhanced) addon starting"
 
 # Firefly III configuration
 export FIREFLY_BASE_URL=$(bashio::config 'firefly_base_url')
@@ -11,66 +11,15 @@ export FIREFLY_TOKEN_API=$(bashio::config 'firefly_token_api')
 # Config file path
 export CONFIG_FILE=$(bashio::config 'config_file')
 
-# Master password for decrypting credentials (Security Enhancement)
+# Security: master password for decrypting credentials (optional if using encrypted config)
 export MASTER_PASSWORD=$(bashio::config 'master_password')
 
-# Schedule configuration
+# Schedule and log level
 export CRON=$(bashio::config 'cron')
-
-# Log level
 export LOG_LEVEL=$(bashio::config 'log_level')
 
-# Validate master password if using encrypted config
-if [[ "$CONFIG_FILE" == *"encrypted"* ]] && [[ -z "$MASTER_PASSWORD" ]]; then
-    bashio::log.warning "Config file appears to be encrypted but MASTER_PASSWORD is not set!"
-    bashio::log.warning "Please set master_password in addon configuration."
-fi
+bashio::log.info "Config: ${CONFIG_FILE}, Firefly: ${FIREFLY_BASE_URL}, Cron: ${CRON}"
 
-bashio::log.info "Starting Israeli Bank Firefly III Importer (Security Enhanced)"
-bashio::log.info "Config file: ${CONFIG_FILE}"
-bashio::log.info "Firefly URL: ${FIREFLY_BASE_URL}"
-bashio::log.info "Cron schedule: ${CRON}"
-
-# Run the importer via node - use path recorded at build time, or discover
-ENTRY=""
-if [[ -f /app/IMPORTER_ENTRY ]]; then
-  if ! read -r ENTRY < /app/IMPORTER_ENTRY; then
-    bashio::log.error "Failed to read /app/IMPORTER_ENTRY"
-  fi
-  [[ -f "$ENTRY" ]] || ENTRY=""
-else
-  bashio::log.warning "/app/IMPORTER_ENTRY missing; falling back to node_modules scan"
-fi
-if [[ -z "$ENTRY" ]]; then
-  NODE_MODULES="/usr/local/lib/node_modules"
-  for dir in "${NODE_MODULES}"/israeli-bank-firefly-importer*; do
-    [[ -d "$dir" ]] || continue
-    if [[ -f "${dir}/src/index.js" ]]; then
-      ENTRY="${dir}/src/index.js"
-      break
-    fi
-  done
-fi
-if [[ -z "$ENTRY" ]] || [[ ! -f "$ENTRY" ]]; then
-  bashio::log.error "Importer entry not found"
-  exit 1
-fi
-
-# Ensure config file exists so the importer doesn't exit silently
-if [[ ! -f "$CONFIG_FILE" ]]; then
-  bashio::log.error "Config file not found: ${CONFIG_FILE}"
-  bashio::log.error "Create the config file (or set config_file in addon options) and ensure it contains 'firefly' and 'banks'."
-  exit 1
-fi
-
-# Run from importer root so module resolution and cwd are correct
-IMPORTER_ROOT="$(dirname "$(dirname "$ENTRY")")"
-cd "$IMPORTER_ROOT" || exit 1
-
-bashio::log.info "Running importer: node ${ENTRY}"
-/usr/bin/node "$ENTRY" 2>&1
-EXIT=$?
-if [ "$EXIT" -ne 0 ]; then
-  bashio::log.error "Importer exited with code ${EXIT}"
-fi
-exit "$EXIT"
+# Run from importer directory so module resolution and cwd are correct (fixed path from Dockerfile)
+cd /app/importer || { bashio::log.error "Importer directory missing"; exit 1; }
+exec node src/index.js

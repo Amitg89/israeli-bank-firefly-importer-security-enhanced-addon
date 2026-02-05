@@ -12,7 +12,7 @@ chmod +x scripts/build-and-test.sh
 ./scripts/build-and-test.sh
 ```
 
-This builds the same image HA would build. If the build succeeds and prints `IMPORTER_ENTRY=/app/importer/src/index.js`, the addon should work in HA.
+This builds the same image HA would build. If the build succeeds and reports the importer binary is found, the addon should work in HA.
 
 **Time:** ~2–5 minutes (vs waiting for HA addon store + rebuild).
 
@@ -23,12 +23,10 @@ After building (Option 1), you can run the **same image** with your encrypted co
 1. **Put your addon config in a folder**, e.g. `./test-config/`:
    - `config.encrypted.yaml` (your encrypted file)
 
-2. **Run the importer inside the container** (bypasses HA/bashio so we pass env by hand):
+2. **Run the importer directly** (bypasses run.sh/bashio so your `-e` env vars are used; run.sh only works inside HA where bashio has config):
 
 ```bash
 # From addon repo root, after ./scripts/build-and-test.sh
-# --entrypoint "" is required: the addon image uses an s6 init entrypoint that does not
-# pass the container's env to the process, so -e vars would be empty without it.
 docker run --rm -it --entrypoint "" \
   -v "$(pwd)/test-config:/config/israeli-bank-firefly-importer:ro" \
   -e CONFIG_FILE=/config/israeli-bank-firefly-importer/config.encrypted.yaml \
@@ -83,6 +81,6 @@ To change addon behavior you have to **rebuild the image** (by updating the addo
 
 | Goal                         | Action |
 |-----------------------------|--------|
-| Test Dockerfile + entry path | Run `./scripts/build-and-test.sh` |
+| Test Dockerfile + binary     | Run `./scripts/build-and-test.sh` |
 | Test on correct architecture | Set `BUILD_FROM` and run the script |
 | See what’s in the image      | `docker run --rm ... ls /usr/local/lib/node_modules` |

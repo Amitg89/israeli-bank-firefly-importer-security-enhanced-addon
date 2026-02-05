@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.15] - 2025-02-05
+
+### Fixed
+- Addon no longer starts and stops immediately with no logs.
+- Aligned with the working [original addon](https://github.com/itairaz1/israeli-bank-firefly-importer-hass-addon) pattern: clone importer repo, `npm install --ignore-scripts` (avoids husky prepare failures in Docker), run `node src/index.js` from a fixed path.
+- Log a startup message at the very beginning of `run.sh` so logs always appear when the addon runs.
+- Simplified `run.sh`: set env vars then `cd /app/importer && exec node src/index.js` (no IMPORTER_ENTRY or node_modules scan).
+
+### Changed
+- `log_level` schema in addon config set to `str` to avoid schema validation issues.
+
 ## [1.0.0] - 2024-02-05
 
 ### Added
