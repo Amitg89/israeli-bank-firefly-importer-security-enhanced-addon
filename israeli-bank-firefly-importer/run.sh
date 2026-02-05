@@ -56,5 +56,14 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
   exit 1
 fi
 
+# Run from importer root so module resolution and cwd are correct
+IMPORTER_ROOT="$(dirname "$(dirname "$ENTRY")")"
+cd "$IMPORTER_ROOT" || exit 1
+
 bashio::log.info "Running importer: node ${ENTRY}"
-exec /usr/bin/node "$ENTRY" 2>&1
+/usr/bin/node "$ENTRY" 2>&1
+EXIT=$?
+if [ "$EXIT" -ne 0 ]; then
+  bashio::log.error "Importer exited with code ${EXIT}"
+fi
+exit "$EXIT"

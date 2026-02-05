@@ -35,6 +35,8 @@ Or manually:
 1. Find **"Israeli Bank FireFly III Importer (Security Enhanced)"** in the Add-on Store
 2. Click **Install**
 
+**Note:** The first install (and each addon version update) builds the image from source (git clone + npm install), which can take **15–30 minutes** depending on your host. Later starts are quick.
+
 ### Step 3: Create Configuration Directory
 
 ```bash
@@ -72,27 +74,32 @@ banks:
 
 ### Step 5: Encrypt Your Configuration (Recommended)
 
-For maximum security, encrypt your config file:
+The encryption tool runs **on your computer** (or any machine with Node.js), not inside the addon. You then copy the encrypted file into Home Assistant.
 
-1. **SSH into Home Assistant** or use the Terminal addon
+**On your computer (PC/Mac/Linux with Node.js installed):**
 
-2. **Install the encryption tool:**
+1. **Create a folder** and put your `config.yaml` there (the one with plaintext bank credentials).
+
+2. **Install the importer package** (includes the encrypt CLI):
    ```bash
    npm install -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git
    ```
 
-3. **Encrypt your config:**
+3. **Encrypt the config:**
    ```bash
-   cd /config/israeli-bank-firefly-importer
+   cd /path/to/your/folder
    israeli-bank-firefly-encrypt -i config.yaml -o config.encrypted.yaml
    ```
-   
    You'll be prompted to create a master password. **Remember this password!**
 
-4. **Delete the plaintext config:**
-   ```bash
-   rm config.yaml
-   ```
+4. **Copy `config.encrypted.yaml` into Home Assistant:**
+   - **Samba share:** Copy to the share folder that maps to `/config` (e.g. `config/israeli-bank-firefly-importer/config.encrypted.yaml`).
+   - **File editor addon:** In HA, open **File editor**, go to `/config/israeli-bank-firefly-importer/`, upload or paste the file as `config.encrypted.yaml`.
+   - **SSH/SCP:** `scp config.encrypted.yaml user@homeassistant:/config/israeli-bank-firefly-importer/`
+
+5. **Delete the plaintext file** on your computer (and never commit it to git).
+
+**Alternative (if you have Node.js on the HA host):** SSH into Home Assistant, install the package with `npm install -g ...`, then run the encrypt command inside `/config/israeli-bank-firefly-importer` and `rm config.yaml` there. Most HA setups don't have Node.js on the host, so the "on your computer" method above is usually easier.
 
 ### Step 6: Configure the Addon
 
