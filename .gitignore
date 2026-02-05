@@ -1,0 +1,15 @@
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local config files (never commit credentials!)
+config.yaml
+config.encrypted.yaml
+*.local.yaml

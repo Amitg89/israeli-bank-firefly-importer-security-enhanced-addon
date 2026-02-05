@@ -1,0 +1,27 @@
+name: "Israeli Bank FireFly III Importer (Security Enhanced)"
+description: "Security-enhanced version with AES-256-GCM encryption for credentials. Imports Israeli bank data into Firefly III."
+version: "1.0.0"
+slug: "israeli-bank-firefly-importer-security-enhanced"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+options:
+  firefly_base_url: 'http://homeassistant.local:8080'
+  firefly_token_api: ''
+  config_file: '/config/israeli-bank-firefly-importer/config.encrypted.yaml'
+  master_password: ''
+  cron: '0 6 * * *'
+  log_level: 'info'
+schema:
+  firefly_base_url: str
+  firefly_token_api: str?
+  config_file: str
+  master_password: str?
+  cron: str
+  log_level: list(info|debug|warn|error)
+map:
+  - "config:rw"

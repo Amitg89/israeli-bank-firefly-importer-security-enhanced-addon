@@ -1,0 +1,59 @@
+# Israeli Bank Firefly III Importer - Configuration Template
+# This file should be ENCRYPTED before use!
+# 
+# Steps:
+# 1. Fill in your credentials below
+# 2. Run: israeli-bank-firefly-encrypt -i config.yaml -o config.encrypted.yaml
+# 3. Delete this plaintext file
+# 4. Set master_password in the addon configuration
+
+# Firefly III Configuration
+firefly:
+  # URL of your Firefly III instance
+  baseUrl: 'http://homeassistant.local:8080'
+  # API Token - Get from Firefly: Options → Profile → OAuth → Personal Access Tokens
+  tokenApi: 'your-firefly-api-token'
+
+# Bank Accounts Configuration
+banks:
+  # Bank 1 (example: Leumi)
+  - type: leumi  # Options: leumi, hapoalim, discount, mizrahi, beinleumi, otsar-hahayal, massad, yahav
+    credentials:
+      username: 'your-bank-username'
+      password: 'your-bank-password'
+    
+    # Credit cards linked to this bank (optional)
+    creditCards:
+      # Credit Card 1 (example: Isracard)
+      - type: isracard  # Options: isracard, visaCal, max, amex
+        credentials:
+          id: '123456789'           # Your ID number
+          card6Digits: '123456'     # First 6 digits of your card
+          password: 'your-isracard-password'
+      
+      # Credit Card 2 (example: Visa Cal) - uncomment if needed
+      # - type: visaCal
+      #   credentials:
+      #     username: 'your-visacal-username'
+      #     password: 'your-visacal-password'
+
+# Schedule - Cron expression (optional, can also be set in addon config)
+# cron: '0 6 * * *'  # Every day at 6 AM
+
+# Scraper settings (optional)
+scraper:
+  parallel: true
+  timeout: 60000
+  args:
+    - '--disable-dev-shm-usage'
+    - '--disable-setuid-sandbox'
+    - '--no-sandbox'
+    - '--no-zygote'
+    - '--disable-gpu'
+    - '--disable-audio-output'
+    - '--headless'
+    - '--single-process'
+
+# Log level (optional, can also be set in addon config)
+# log:
+#   level: info  # Options: debug, info, warn, error
