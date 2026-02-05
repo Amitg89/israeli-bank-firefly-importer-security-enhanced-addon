@@ -12,9 +12,38 @@ chmod +x scripts/build-and-test.sh
 ./scripts/build-and-test.sh
 ```
 
-This builds the same image HA would build. If the build succeeds and prints `IMPORTER_ENTRY=/usr/local/lib/node_modules/.../src/index.js`, the addon should work in HA.
+This builds the same image HA would build. If the build succeeds and prints `IMPORTER_ENTRY=/app/importer/src/index.js`, the addon should work in HA.
 
 **Time:** ~2–5 minutes (vs waiting for HA addon store + rebuild).
+
+## Option 1b: Run with your config on your PC (see why it exits)
+
+After building (Option 1), you can run the **same image** with your encrypted config and see the real Node error in the terminal:
+
+1. **Put your addon config in a folder**, e.g. `./test-config/`:
+   - `config.encrypted.yaml` (your encrypted file)
+
+2. **Run the importer inside the container** (bypasses HA/bashio so we pass env by hand):
+
+```bash
+# From addon repo root, after ./scripts/build-and-test.sh
+# --entrypoint "" is required: the addon image uses an s6 init entrypoint that does not
+# pass the container's env to the process, so -e vars would be empty without it.
+docker run --rm -it --entrypoint "" \
+  -v "$(pwd)/test-config:/config/israeli-bank-firefly-importer:ro" \
+  -e CONFIG_FILE=/config/israeli-bank-firefly-importer/config.encrypted.yaml \
+  -e FIREFLY_BASE_URL=http://host.docker.internal:3473 \
+  -e FIREFLY_TOKEN_API=your-token-if-needed \
+  -e MASTER_PASSWORD=your-master-password \
+  -e CRON="0 6 * * *" \
+  -e LOG_LEVEL=info \
+  israeli-bank-firefly-importer-security-enhanced:test \
+  /bin/sh -c 'cd /app/importer && node src/index.js'
+```
+
+- Replace `your-master-password` and paths/ports as needed.
+- Use `host.docker.internal` so the container can reach Firefly on your host (e.g. `http://host.docker.internal:3473`).
+- Any **Critical error** or stack trace will appear in your terminal so we can fix the real issue.
 
 ## Option 2: Build for your HA architecture
 
