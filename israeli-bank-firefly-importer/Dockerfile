@@ -1,4 +1,5 @@
-ARG BUILD_FROM
+# Default for local builds; HA supervisor overrides with correct arch
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
 FROM $BUILD_FROM
 
 # Install Node.js, npm, and Chromium for Puppeteer
@@ -14,31 +15,27 @@ WORKDIR /app
 COPY run.sh /
 RUN chmod a+x /run.sh
 
-# Install git and the security-enhanced importer in same layer
-# --ignore-scripts skips "prepare" (husky install) which fails in Docker
+# Clone and install importer locally so layout is predictable (avoids npm global git-install quirks)
 RUN apk add --no-cache git \
-    && npm i -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git --ignore-scripts \
+    && git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git /app/importer \
+    && cd /app/importer && npm install --ignore-scripts \
     && apk del git
 
-# Record the actual path to the importer entry (use package.json "main" field)
+# Resolve entry from package.json "main" and record it
 RUN node -e " \
   const fs = require('fs'); \
   const path = require('path'); \
-  const mod = '/usr/local/lib/node_modules'; \
-  const dirName = 'israeli-bank-firefly-importer'; \
-  const pkgPath = path.join(mod, dirName, 'package.json'); \
-  if (!fs.existsSync(pkgPath)) throw new Error('package.json not found at ' + pkgPath); \
+  const root = '/app/importer'; \
+  const pkgPath = path.join(root, 'package.json'); \
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')); \
-  if (pkg.name !== 'israeli-bank-firefly-importer') throw new Error('wrong package name: ' + pkg.name); \
   const main = pkg.main || 'src/index.js'; \
-  const entry = path.join(mod, dirName, main); \
-  if (!fs.existsSync(entry)) throw new Error('entry not found: ' + entry + ' (dir contents: ' + fs.readdirSync(path.join(mod, dirName)).join(', ') + ')'); \
+  const entry = path.join(root, main); \
+  if (!fs.existsSync(entry)) throw new Error('entry not found: ' + entry); \
   fs.writeFileSync('/app/IMPORTER_ENTRY', entry); \
 "
 
-# Allow non-root user to run the global npm binary and read node_modules
-RUN chmod -R o+rx /usr/local/lib/node_modules \
-    && chmod o+rx /usr/local/bin/israeli-bank-firefly-importer 2>/dev/null || true
+# Allow non-root user to read and run the importer
+RUN chmod -R o+rx /app/importer
 
 # Add non-root user for security (no --no-sandbox needed)
 RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
