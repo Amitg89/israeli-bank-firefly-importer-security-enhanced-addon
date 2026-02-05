@@ -214,6 +214,16 @@ Check the Log tab for error messages. Common issues:
 
 ---
 
+## Testing changes without waiting for HA
+
+To validate Dockerfile or `run.sh` changes locally (same image HA builds), run:
+
+```bash
+./scripts/build-and-test.sh
+```
+
+See [TESTING.md](TESTING.md) for details and other options.
+
 ## License
 
 [MIT License](LICENSE)
