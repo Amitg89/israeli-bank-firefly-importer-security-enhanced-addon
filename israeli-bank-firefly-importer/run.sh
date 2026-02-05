@@ -2,7 +2,7 @@
 set -e
 
 # Version marker to confirm the addon image is updated
-bashio::log.info "run.sh version 1.0.13"
+bashio::log.info "run.sh version 1.0.14"
 
 # Firefly III configuration
 export FIREFLY_BASE_URL=$(bashio::config 'firefly_base_url')
@@ -34,8 +34,12 @@ bashio::log.info "Cron schedule: ${CRON}"
 # Run the importer via node - use path recorded at build time, or discover
 ENTRY=""
 if [[ -f /app/IMPORTER_ENTRY ]]; then
-  read -r ENTRY < /app/IMPORTER_ENTRY
+  if ! read -r ENTRY < /app/IMPORTER_ENTRY; then
+    bashio::log.error "Failed to read /app/IMPORTER_ENTRY"
+  fi
   [[ -f "$ENTRY" ]] || ENTRY=""
+else
+  bashio::log.warning "/app/IMPORTER_ENTRY missing; falling back to node_modules scan"
 fi
 if [[ -z "$ENTRY" ]]; then
   NODE_MODULES="/usr/local/lib/node_modules"
