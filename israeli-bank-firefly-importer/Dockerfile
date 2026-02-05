@@ -15,9 +15,9 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Install git and the security-enhanced importer in same layer
-# This ensures git is available for npm to clone from GitHub
+# --ignore-scripts skips "prepare" (husky install) which fails in Docker
 RUN apk add --no-cache git \
-    && npm i -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git \
+    && npm i -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git --ignore-scripts \
     && apk del git
 
 # Add non-root user for security (no --no-sandbox needed)
