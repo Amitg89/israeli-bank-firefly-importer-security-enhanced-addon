@@ -20,6 +20,10 @@ RUN apk add --no-cache git \
     && npm i -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git --ignore-scripts \
     && apk del git
 
+# Allow non-root user to run the global npm binary and read node_modules
+RUN chmod -R o+rx /usr/local/lib/node_modules \
+    && chmod o+rx /usr/local/bin/israeli-bank-firefly-importer 2>/dev/null || true
+
 # Add non-root user for security (no --no-sandbox needed)
 RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
     && mkdir -p /home/pptruser/Downloads /app \
