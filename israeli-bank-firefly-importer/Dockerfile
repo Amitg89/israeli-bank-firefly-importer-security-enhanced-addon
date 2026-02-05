@@ -1,8 +1,8 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install Node.js, npm, and Chromium for Puppeteer
-RUN apk add --no-cache nodejs npm chromium
+# Install Node.js, npm, Chromium for Puppeteer, and git for npm install from GitHub
+RUN apk add --no-cache nodejs npm chromium git
 
 # Configure Puppeteer to use system Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
