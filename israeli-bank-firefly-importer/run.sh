@@ -1,6 +1,9 @@
 #!/usr/bin/with-contenv bashio
 set -e
 
+# Version marker to confirm the addon image is updated
+bashio::log.info "run.sh version 1.0.13"
+
 # Firefly III configuration
 export FIREFLY_BASE_URL=$(bashio::config 'firefly_base_url')
 export FIREFLY_TOKEN_API=$(bashio::config 'firefly_token_api')
