@@ -20,23 +20,19 @@ RUN apk add --no-cache git \
     && npm i -g https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git --ignore-scripts \
     && apk del git
 
-# Record the actual path to the importer entry (npm from git can name folder differently)
+# Record the actual path to the importer entry (use package.json "main" field)
 RUN node -e " \
   const fs = require('fs'); \
   const path = require('path'); \
   const mod = '/usr/local/lib/node_modules'; \
-  const dirs = fs.readdirSync(mod); \
-  let entry = null; \
-  for (const name of dirs) { \
-    const pkgPath = path.join(mod, name, 'package.json'); \
-    const srcPath = path.join(mod, name, 'src', 'index.js'); \
-    if (!fs.existsSync(pkgPath) || !fs.existsSync(srcPath)) continue; \
-    try { \
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')); \
-      if (pkg.name === 'israeli-bank-firefly-importer') { entry = srcPath; break; } \
-    } catch (_) {} \
-  } \
-  if (!entry) throw new Error('importer package not found. Top-level: ' + dirs.join(', ')); \
+  const dirName = 'israeli-bank-firefly-importer'; \
+  const pkgPath = path.join(mod, dirName, 'package.json'); \
+  if (!fs.existsSync(pkgPath)) throw new Error('package.json not found at ' + pkgPath); \
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')); \
+  if (pkg.name !== 'israeli-bank-firefly-importer') throw new Error('wrong package name: ' + pkg.name); \
+  const main = pkg.main || 'src/index.js'; \
+  const entry = path.join(mod, dirName, main); \
+  if (!fs.existsSync(entry)) throw new Error('entry not found: ' + entry + ' (dir contents: ' + fs.readdirSync(path.join(mod, dirName)).join(', ') + ')'); \
   fs.writeFileSync('/app/IMPORTER_ENTRY', entry); \
 "
 
