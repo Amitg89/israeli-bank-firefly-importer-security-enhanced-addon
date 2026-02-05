@@ -28,5 +28,5 @@ bashio::log.info "Config file: ${CONFIG_FILE}"
 bashio::log.info "Firefly URL: ${FIREFLY_BASE_URL}"
 bashio::log.info "Cron schedule: ${CRON}"
 
-# Run the importer
-israeli-bank-firefly-importer
+# Run the importer (full path - HA container often has minimal PATH)
+exec /usr/local/bin/israeli-bank-firefly-importer
