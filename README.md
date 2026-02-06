@@ -54,6 +54,8 @@ Or manually:
 
 **Note:** The first install (and each addon version update) builds the image from source (git clone + npm install), which can take **15–30 minutes** depending on your host. Later starts are quick.
 
+**If an update finished very quickly**, Docker may have reused a cached layer and the **importer** code inside the image might still be old. To force a fresh importer: **Uninstall the addon** (Data is preserved; only the addon is removed), then **Install** it again. That triggers a full rebuild. Alternatively, when publishing a new addon version, bump `IMPORTER_CACHEBUST` in the Dockerfile (e.g. to `addon-1.0.20`) so the clone step is not served from cache.
+
 ### Step 3: Create Configuration Directory
 
 ```bash

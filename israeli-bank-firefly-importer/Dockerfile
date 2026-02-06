@@ -16,8 +16,11 @@ WORKDIR /app
 COPY run.sh /
 RUN chmod a+x /run.sh
 
+# Bump the string below when you want to force a fresh clone (avoids Docker cache serving old importer code)
+ARG IMPORTER_CACHEBUST="addon-1.0.19"
 # Clone security-enhanced importer and install deps (--ignore-scripts skips husky prepare)
-RUN git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git /app/importer \
+RUN echo "Importer cache bust: ${IMPORTER_CACHEBUST}" && \
+    git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git /app/importer \
     && cd /app/importer && npm install --ignore-scripts \
     && apk del git
 
