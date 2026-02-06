@@ -19,6 +19,23 @@ This addon uses the [security-enhanced importer](https://github.com/Amitg89/isra
 | **PBKDF2 Key Derivation** | 100,000 iterations for secure key generation |
 | **Log Redaction** | Credentials never appear in logs |
 
+## How it works (wrapper vs scraper)
+
+**This repository is only the wrapper.** It does **not** contain the scraper or importer code.
+
+| What | Where it lives | When it gets used |
+|------|----------------|-------------------|
+| **Addon (wrapper)** | This repo: `israeli-bank-firefly-importer-security-enhanced-addon` | Defines the HA addon: `config.yaml`, `Dockerfile`, `run.sh`. You add this repo to Home Assistant. |
+| **Importer (scraper + Firefly logic)** | Another repo: [israeli-bank-firefly-importer-security-enhanced](https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced) | **Downloaded during the Docker image build.** When you install or update the addon, the Dockerfile runs `git clone ... security-enhanced.git /app/importer` and `npm install` there. So the running container has the importer code inside the image. |
+
+Flow:
+
+1. **Install/update addon** → Home Assistant builds a Docker image from this repo’s `Dockerfile`.
+2. **During build** → The Dockerfile clones the security-enhanced importer from GitHub into `/app/importer` and runs `npm install --ignore-scripts`. The importer itself depends on [israeli-bank-scrapers](https://github.com/eshaham/israeli-bank-scrapers) (via npm); that’s installed as a dependency, not cloned.
+3. **At runtime** → The addon runs `run.sh`, which sets env vars (Firefly URL, config path, master password, cron) and then runs `node /app/importer/src/index.js`. So the “actual” scraper/importer code runs from the copy that was baked into the image at build time.
+
+So: **this project = wrapper only. The scraper/importer code is pulled from GitHub during the installation/build process** (when the addon image is built), not shipped inside this repo.
+
 ## Installation
 
 ### Step 1: Add Repository to Home Assistant
