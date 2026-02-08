@@ -23,7 +23,7 @@ ARG IMPORTER_REPO_URL="https://github.com/Amitg89/israeli-bank-firefly-importer-
 # Scrapers package: GitHub URL to use (overrides npm dependency). Your fork with Isracard/Amex fixes.
 ARG SCRAPERS_REPO_URL="https://github.com/Amitg89/updated-Israeli-bank-scrapers.git"
 # Clone security-enhanced importer and install deps (--ignore-scripts skips husky prepare)
-# Scrapers: we skip build:types because npm install from git can omit tsconfig.json (package "files"); runtime only needs build:js output.
+# Scrapers: npm install from git only includes package "files" (lib/), no src/. So we clone the fork with git, build from source, then copy built lib into node_modules.
 RUN echo "=== Addon install: importer package ===" && \
     echo "Importer cache bust: ${IMPORTER_CACHEBUST}" && \
     echo "Cloning importer from URL: ${IMPORTER_REPO_URL}" && \
@@ -31,12 +31,19 @@ RUN echo "=== Addon install: importer package ===" && \
     cd /app/importer && \
     echo "Importer cloned at commit: $(git rev-parse HEAD)" && \
     echo "Importer package version: $(node -p "require('./package.json').version")" && \
-    echo "Installing npm dependencies..." && \
+    echo "Installing npm dependencies (importer + israeli-bank-scrapers from npm)..." && \
     npm install --ignore-scripts && \
-    echo "Overriding israeli-bank-scrapers with fork from URL: ${SCRAPERS_REPO_URL}" && \
-    npm install "${SCRAPERS_REPO_URL}" --ignore-scripts && \
-    echo "Building israeli-bank-scrapers (TypeScript -> lib/)..." && \
-    (cd node_modules/israeli-bank-scrapers && npm install --ignore-scripts && npm run clean && npm run build:js && npm run postbuild) && \
+    echo "Building scrapers fork from source (clone has full src/): ${SCRAPERS_REPO_URL}" && \
+    git clone --depth 1 "${SCRAPERS_REPO_URL}" /tmp/scrapers-build && \
+    cd /tmp/scrapers-build && \
+    npm install --ignore-scripts && \
+    npm run clean && npm run build:js && npm run postbuild && \
+    echo "Copying built lib into importer node_modules/israeli-bank-scrapers..." && \
+    rm -rf /app/importer/node_modules/israeli-bank-scrapers && \
+    cp -r /tmp/scrapers-build /app/importer/node_modules/israeli-bank-scrapers && \
+    cd /app/importer/node_modules/israeli-bank-scrapers && npm prune --production && \
+    rm -rf /tmp/scrapers-build && \
+    cd /app/importer && \
     echo "=== Installed versions ===" && \
     echo "Importer (from clone above): $(node -p "require('./package.json').version")" && \
     echo "israeli-bank-scrapers: $(node -p "require('israeli-bank-scrapers/package.json').version") (from ${SCRAPERS_REPO_URL})" && \
