@@ -23,7 +23,7 @@ RUN echo "Importer cache-bust: ${IMPORTER_CACHEBUST}"
 # Clone security-enhanced importer and install deps (--ignore-scripts skips husky prepare)
 RUN git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git /app/importer \
     && cd /app/importer && npm install --ignore-scripts \
-    && (cd node_modules/israeli-bank-scrapers && npm install --ignore-scripts && npm run clean && npm run build:types && npm run build:js) \
+    && (cd node_modules/israeli-bank-scrapers && npm install --ignore-scripts && npm run clean && npm run build:js) \
     && apk del git
 
 # Add non-root user (no --no-sandbox needed for Chromium)
