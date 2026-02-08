@@ -1,6 +1,6 @@
 name: "Israeli Bank FireFly III Importer (Security Enhanced)"
 description: "Security-enhanced version with AES-256-GCM encryption for credentials. Imports Israeli bank data into Firefly III."
-version: "1.0.18"
+version: "1.0.19"
 slug: "israeli-bank-firefly-importer-security-enhanced"
 init: false
 arch:
