@@ -34,6 +34,8 @@ RUN echo "=== Addon install: importer package ===" && \
     npm install --ignore-scripts && \
     echo "Overriding israeli-bank-scrapers with fork from URL: ${SCRAPERS_REPO_URL}" && \
     npm install "${SCRAPERS_REPO_URL}" --ignore-scripts && \
+    echo "Building israeli-bank-scrapers (TypeScript -> lib/)..." && \
+    (cd node_modules/israeli-bank-scrapers && npm install --ignore-scripts && npm run clean && npm run build:types && npm run build:js && npm run postbuild) && \
     echo "=== Installed versions ===" && \
     echo "Importer (from clone above): $(node -p "require('./package.json').version")" && \
     echo "israeli-bank-scrapers: $(node -p "require('israeli-bank-scrapers/package.json').version") (from ${SCRAPERS_REPO_URL})" && \
