@@ -17,12 +17,28 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Bump the string below when you want to force a fresh clone (avoids Docker cache serving old importer code)
-ARG IMPORTER_CACHEBUST="addon-1.0.19"
+ARG IMPORTER_CACHEBUST="addon-1.0.20"
+# Importer repo URL (logged so you can verify source during install)
+ARG IMPORTER_REPO_URL="https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git"
+# Scrapers package: GitHub URL to use (overrides npm dependency). Your fork with Isracard/Amex fixes.
+ARG SCRAPERS_REPO_URL="https://github.com/Amitg89/updated-Israeli-bank-scrapers.git"
 # Clone security-enhanced importer and install deps (--ignore-scripts skips husky prepare)
-RUN echo "Importer cache bust: ${IMPORTER_CACHEBUST}" && \
-    git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git /app/importer \
-    && cd /app/importer && npm install --ignore-scripts \
-    && apk del git
+RUN echo "=== Addon install: importer package ===" && \
+    echo "Importer cache bust: ${IMPORTER_CACHEBUST}" && \
+    echo "Cloning importer from URL: ${IMPORTER_REPO_URL}" && \
+    git clone --depth 1 "${IMPORTER_REPO_URL}" /app/importer && \
+    cd /app/importer && \
+    echo "Importer cloned at commit: $(git rev-parse HEAD)" && \
+    echo "Importer package version: $(node -p "require('./package.json').version")" && \
+    echo "Installing npm dependencies..." && \
+    npm install --ignore-scripts && \
+    echo "Overriding israeli-bank-scrapers with fork from URL: ${SCRAPERS_REPO_URL}" && \
+    npm install "${SCRAPERS_REPO_URL}" --ignore-scripts && \
+    echo "=== Installed versions ===" && \
+    echo "Importer (from clone above): $(node -p "require('./package.json').version")" && \
+    echo "israeli-bank-scrapers: $(node -p "require('israeli-bank-scrapers/package.json').version") (from ${SCRAPERS_REPO_URL})" && \
+    echo "=== End install log ===" && \
+    apk del git
 
 # Add non-root user (no --no-sandbox needed for Chromium)
 RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \

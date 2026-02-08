@@ -6,7 +6,7 @@ Home Assistant addon for the security-enhanced Israeli Bank Firefly Importer.
 
 This addon is based on the excellent work of:
 - **[Itai Raz](https://github.com/itairaz1)** - Original [israeli-bank-firefly-importer](https://github.com/itairaz1/israeli-bank-firefly-importer) and [HA addon](https://github.com/itairaz1/israeli-bank-firefly-importer-hass-addon)
-- **[Eran Shaham](https://github.com/eshaham)** - [Israeli Bank Scrapers](https://github.com/eshaham/israeli-bank-scrapers)
+- **[Eran Shaham](https://github.com/eshaham)** - [Israeli Bank Scrapers](https://github.com/eshaham/israeli-bank-scrapers). This addon uses the [updated fork](https://github.com/Amitg89/updated-Israeli-bank-scrapers) (Isracard/Amex fixes).
 
 ## What's Different?
 
@@ -31,7 +31,7 @@ This addon uses the [security-enhanced importer](https://github.com/Amitg89/isra
 Flow:
 
 1. **Install/update addon** → Home Assistant builds a Docker image from this repo’s `Dockerfile`.
-2. **During build** → The Dockerfile clones the security-enhanced importer from GitHub into `/app/importer` and runs `npm install --ignore-scripts`. The importer itself depends on [israeli-bank-scrapers](https://github.com/eshaham/israeli-bank-scrapers) (via npm); that’s installed as a dependency, not cloned.
+2. **During build** → The Dockerfile clones the security-enhanced importer from GitHub into `/app/importer`, runs `npm install --ignore-scripts`, then overrides **israeli-bank-scrapers** with the [updated fork](https://github.com/Amitg89/updated-Israeli-bank-scrapers) (so you get the Isracard/Amex fixes). Build logs show the importer URL, scrapers URL, and installed versions.
 3. **At runtime** → The addon runs `run.sh`, which sets env vars (Firefly URL, config path, master password, cron) and then runs `node /app/importer/src/index.js`. So the “actual” scraper/importer code runs from the copy that was baked into the image at build time.
 
 So: **this project = wrapper only. The scraper/importer code is pulled from GitHub during the installation/build process** (when the addon image is built), not shipped inside this repo.
@@ -235,7 +235,8 @@ Check the Log tab for error messages. Common issues:
 
 - **Security-Enhanced Importer:** https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced
 - **Original Importer:** https://github.com/itairaz1/israeli-bank-firefly-importer
-- **Israeli Bank Scrapers:** https://github.com/eshaham/israeli-bank-scrapers
+- **Israeli Bank Scrapers (upstream):** https://github.com/eshaham/israeli-bank-scrapers  
+- **Scrapers fork used by this addon:** https://github.com/Amitg89/updated-Israeli-bank-scrapers
 - **Firefly III:** https://www.firefly-iii.org/
 
 ---
