@@ -36,6 +36,7 @@ if docker run --rm israeli-bank-firefly-importer-security-enhanced:test test -f 
   echo "    -e CONFIG_FILE=/config/israeli-bank-firefly-importer/config.encrypted.yaml \\"
   echo "    -e FIREFLY_BASE_URL=http://host.docker.internal:3473 -e FIREFLY_TOKEN_API=x \\"
   echo "    -e MASTER_PASSWORD=xxx -e CRON='0 6 * * *' -e LOG_LEVEL=info \\"
+  echo "    -e SCRAPER_TIMEOUT=60000 \\"
   echo "    israeli-bank-firefly-importer-security-enhanced:test /run.sh"
   echo "  See TESTING.md for details."
 else

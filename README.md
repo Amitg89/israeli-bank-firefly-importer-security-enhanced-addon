@@ -6,7 +6,7 @@ Home Assistant addon for the security-enhanced Israeli Bank Firefly Importer.
 
 This addon is based on the excellent work of:
 - **[Itai Raz](https://github.com/itairaz1)** - Original [israeli-bank-firefly-importer](https://github.com/itairaz1/israeli-bank-firefly-importer) and [HA addon](https://github.com/itairaz1/israeli-bank-firefly-importer-hass-addon)
-- **[Eran Shaham](https://github.com/eshaham)** - [Israeli Bank Scrapers](https://github.com/eshaham/israeli-bank-scrapers). This addon uses the [updated fork](https://github.com/Amitg89/updated-Israeli-bank-scrapers) (Isracard/Amex fixes).
+- **[Eran Shaham](https://github.com/eshaham)** - [Israeli Bank Scrapers](https://github.com/eshaham/israeli-bank-scrapers)
 
 ## What's Different?
 
@@ -18,23 +18,6 @@ This addon uses the [security-enhanced importer](https://github.com/Amitg89/isra
 | **Master Password Protection** | Credentials decrypted only with your password |
 | **PBKDF2 Key Derivation** | 100,000 iterations for secure key generation |
 | **Log Redaction** | Credentials never appear in logs |
-
-## How it works (wrapper vs scraper)
-
-**This repository is only the wrapper.** It does **not** contain the scraper or importer code.
-
-| What | Where it lives | When it gets used |
-|------|----------------|-------------------|
-| **Addon (wrapper)** | This repo: `israeli-bank-firefly-importer-security-enhanced-addon` | Defines the HA addon: `config.yaml`, `Dockerfile`, `run.sh`. You add this repo to Home Assistant. |
-| **Importer (scraper + Firefly logic)** | Another repo: [israeli-bank-firefly-importer-security-enhanced](https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced) | **Downloaded during the Docker image build.** When you install or update the addon, the Dockerfile runs `git clone ... security-enhanced.git /app/importer` and `npm install` there. So the running container has the importer code inside the image. |
-
-Flow:
-
-1. **Install/update addon** → Home Assistant builds a Docker image from this repo’s `Dockerfile`.
-2. **During build** → The Dockerfile clones the security-enhanced importer from GitHub into `/app/importer`, runs `npm install --ignore-scripts`, then overrides **israeli-bank-scrapers** with the [updated fork](https://github.com/Amitg89/updated-Israeli-bank-scrapers) (so you get the Isracard/Amex fixes). Build logs show the importer URL, scrapers URL, and installed versions.
-3. **At runtime** → The addon runs `run.sh`, which sets env vars (Firefly URL, config path, master password, cron) and then runs `node /app/importer/src/index.js`. So the “actual” scraper/importer code runs from the copy that was baked into the image at build time.
-
-So: **this project = wrapper only. The scraper/importer code is pulled from GitHub during the installation/build process** (when the addon image is built), not shipped inside this repo.
 
 ## Installation
 
@@ -53,8 +36,6 @@ Or manually:
 2. Click **Install**
 
 **Note:** The first install (and each addon version update) builds the image from source (git clone + npm install), which can take **15–30 minutes** depending on your host. Later starts are quick.
-
-**If an update finished very quickly**, Docker may have reused a cached layer and the **importer** code inside the image might still be old. To force a fresh importer: **Uninstall the addon** (Data is preserved; only the addon is removed), then **Install** it again. That triggers a full rebuild. Alternatively, when publishing a new addon version, bump `IMPORTER_CACHEBUST` in the Dockerfile (e.g. to `addon-1.0.20`) so the clone step is not served from cache.
 
 ### Step 3: Create Configuration Directory
 
@@ -132,6 +113,7 @@ Go to the addon **Configuration** tab and set:
 | `master_password` | The password you used to encrypt the config |
 | `cron` | Schedule (e.g., `0 6 * * *` for daily at 6 AM) |
 | `log_level` | `info` (or `debug` for troubleshooting) |
+| `scraper_timeout` | `60000` (navigation timeout in ms; increase if you see "Navigation timeout" in logs, e.g. in Docker/HA) |
 
 ### Step 7: Start the Addon
 
@@ -151,6 +133,7 @@ Go to the addon **Configuration** tab and set:
 | `master_password` | No* | Master password (*required for encrypted configs) |
 | `cron` | Yes | Cron schedule for imports |
 | `log_level` | No | Log verbosity (info/debug/warn/error) |
+| `scraper_timeout` | No | Navigation timeout in ms (default `60000`). Increase if scraping times out in Docker/HA. |
 
 ---
 
@@ -235,8 +218,7 @@ Check the Log tab for error messages. Common issues:
 
 - **Security-Enhanced Importer:** https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced
 - **Original Importer:** https://github.com/itairaz1/israeli-bank-firefly-importer
-- **Israeli Bank Scrapers (upstream):** https://github.com/eshaham/israeli-bank-scrapers  
-- **Scrapers fork used by this addon:** https://github.com/Amitg89/updated-Israeli-bank-scrapers
+- **Israeli Bank Scrapers:** https://github.com/eshaham/israeli-bank-scrapers
 - **Firefly III:** https://www.firefly-iii.org/
 
 ---
