@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.21] - 2026-07-19
+
+### Fixed
+- "Navigating frame was detached" crash on all scrapers: the addon image installs the latest Alpine Chromium, which the scraper's pinned Puppeteer 22.15 (2024) cannot drive. The scraper fork is now merged with upstream master (Puppeteer 24.40 + 2026 bank-site fixes, including Max credit-card balances), keeping the fork's Isracard login-flip and anti-bot patches.
+
 ## [1.0.20] - 2026-07-19
 
 ### Added
