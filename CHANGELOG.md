@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.22] - 2026-07-19
+
+### Fixed
+- Chromium now launches with `--disable-dev-shm-usage --no-sandbox --disable-gpu` by default: modern Chromium crashes with "Navigating frame was detached" inside HA's container due to the small /dev/shm. No manual `scraper.options.args` config needed anymore.
+
 ## [1.0.21] - 2026-07-19
 
 ### Fixed
