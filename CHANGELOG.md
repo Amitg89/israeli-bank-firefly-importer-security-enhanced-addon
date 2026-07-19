@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.27] - 2026-07-19
+
+### Changed
+- **Switched the add-on base image from Alpine to Debian (glibc)** so Chromium is the full mainstream build instead of Alpine's stripped musl one. This targets the root cause of the Discount login hang: Alpine's Chromium is bot-flagged and freezes on Telebank's post-login SPA loader, while the same scrape succeeds in a real browser. Added `build.yaml` pinning the Debian bookworm base per arch; Chromium path is now `/usr/bin/chromium`; fonts and root execution retained from 1.0.26. Dropped the i386 arch (no Debian bookworm base).
+
 ## [1.0.26] - 2026-07-19
 
 ### Changed

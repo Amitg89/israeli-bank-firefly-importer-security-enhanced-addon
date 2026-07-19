@@ -1,17 +1,21 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
-# HA supervisor passes BUILD_FROM; default for local builds
-ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
+# Debian base (glibc) so we get a full, mainstream Chromium instead of Alpine's
+# stripped musl build — Alpine's Chromium is bot-flagged by Discount/Telebank
+# and hangs on the post-login SPA loader. build.yaml pins the Debian base per arch.
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base-debian:bookworm
 FROM $BUILD_FROM
 
-# Install Node.js, npm, Chromium, git, and fonts.
-# Fonts (incl. Hebrew via Noto) matter: a browser with no fonts can fail to
-# lay out the bank's SPA and hang on its loading screen.
-RUN apk add --no-cache nodejs npm chromium git \
-    fontconfig font-noto font-noto-hebrew ttf-dejavu
+# Install Node.js, npm, Chromium, git, and fonts (Hebrew via Noto).
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        nodejs npm chromium git ca-certificates \
+        fontconfig fonts-noto fonts-liberation fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
 
-# Configure Puppeteer to use system Chromium
+# Configure Puppeteer to use the system (Debian) Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
@@ -20,7 +24,7 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Cache-bust: bump this when importer or scraper fixes are pushed so HA addon update re-clones
-ARG IMPORTER_CACHEBUST=2026-07-19-fonts-root-screenshot
+ARG IMPORTER_CACHEBUST=2026-07-19-debian-base
 RUN echo "Importer cache-bust: ${IMPORTER_CACHEBUST}"
 
 # Clone importer and install deps (scraper from GitHub has no src/ in pack, so we build it separately)
@@ -30,7 +34,7 @@ RUN git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer
     && (cd /tmp/scraper && npm install --ignore-scripts && npm run clean && npm run build:js) \
     && cp -r /tmp/scraper/lib /app/importer/node_modules/israeli-bank-scrapers/ \
     && rm -rf /tmp/scraper \
-    && apk del git
+    && apt-get purge -y git && apt-get autoremove -y
 
 # Run as root: HA add-ons are isolated containers, and root lets Chromium
 # write failure screenshots to the mapped /config volume for debugging.
