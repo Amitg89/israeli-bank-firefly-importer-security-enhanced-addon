@@ -3,8 +3,11 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
 FROM $BUILD_FROM
 
-# Install Node.js, npm, Chromium, and git (for clone)
-RUN apk add --no-cache nodejs npm chromium git
+# Install Node.js, npm, Chromium, git, and fonts.
+# Fonts (incl. Hebrew via Noto) matter: a browser with no fonts can fail to
+# lay out the bank's SPA and hang on its loading screen.
+RUN apk add --no-cache nodejs npm chromium git \
+    fontconfig font-noto font-noto-hebrew ttf-dejavu
 
 # Configure Puppeteer to use system Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
@@ -17,7 +20,7 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Cache-bust: bump this when importer or scraper fixes are pushed so HA addon update re-clones
-ARG IMPORTER_CACHEBUST=2026-07-19-discount-stealth
+ARG IMPORTER_CACHEBUST=2026-07-19-fonts-root-screenshot
 RUN echo "Importer cache-bust: ${IMPORTER_CACHEBUST}"
 
 # Clone importer and install deps (scraper from GitHub has no src/ in pack, so we build it separately)
@@ -29,12 +32,8 @@ RUN git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer
     && rm -rf /tmp/scraper \
     && apk del git
 
-# Add non-root user (no --no-sandbox needed for Chromium)
-RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
-    && mkdir -p /home/pptruser/Downloads \
-    && chown -R pptruser:pptruser /home/pptruser \
-    && chown -R pptruser:pptruser /app
-
-USER pptruser
-
+# Run as root: HA add-ons are isolated containers, and root lets Chromium
+# write failure screenshots to the mapped /config volume for debugging.
+# Chromium runs with --no-sandbox (set in the importer's default scraper args),
+# which is required when running as root.
 CMD ["/run.sh"]

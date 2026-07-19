@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.26] - 2026-07-19
+
+### Changed
+- Added real fonts (Noto incl. Hebrew, DejaVu) to the image — a fontless browser can fail to render the bank's SPA and hang on its loader.
+- Run the container as root so Chromium can save a failure screenshot to the mapped /config volume for debugging (add-ons are isolated containers; Chromium already runs with --no-sandbox). Set `scraper.options.storeFailureScreenShotPath` in your config to capture it.
+
 ## [1.0.25] - 2026-07-19
 
 ### Fixed
