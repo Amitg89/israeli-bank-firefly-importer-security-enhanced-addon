@@ -17,7 +17,7 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Cache-bust: bump this when importer or scraper fixes are pushed so HA addon update re-clones
-ARG IMPORTER_CACHEBUST=2026-07-19-default-chromium-args
+ARG IMPORTER_CACHEBUST=2026-07-19-discount-headless-fix
 RUN echo "Importer cache-bust: ${IMPORTER_CACHEBUST}"
 
 # Clone importer and install deps (scraper from GitHub has no src/ in pack, so we build it separately)

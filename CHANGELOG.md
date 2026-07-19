@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.23] - 2026-07-19
+
+### Fixed
+- Discount login stuck on the SPA loader (UNKNOWN_ERROR): the site's bot detection stalls for a HeadlessChrome user agent. The scraper now masks the UA before submitting (as Isracard does) and polls for the account homepage / password-renewal / error states instead of a single navigation wait.
+
 ## [1.0.22] - 2026-07-19
 
 ### Fixed
