@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.24] - 2026-07-19
+
+### Fixed
+- Discount still stalled on the post-login loader from the addon (verified working locally): the Linux/headless fingerprint was the tell. The scraper now presents a coherent Windows-Chrome identity (UA string, client hints, he-IL Accept-Language), and `--disable-blink-features=AutomationControlled` joined the default Chromium args.
+
 ## [1.0.23] - 2026-07-19
 
 ### Fixed
