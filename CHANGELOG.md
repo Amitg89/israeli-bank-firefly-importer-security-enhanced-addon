@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.20] - 2026-07-19
+
+### Added
+- Automatic bank balance reconciliation: when the scraped bank balance differs from the balance Firefly III computed from transactions, the importer now creates a Firefly `reconciliation` transaction (tagged `balance-adjustment`) to close the gap. Disable with `reconcileBalance: false` in the importer config yaml.
+
 ## [1.0.15] - 2025-02-05
 
 ### Fixed
