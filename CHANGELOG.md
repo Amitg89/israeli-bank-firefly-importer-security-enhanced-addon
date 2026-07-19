@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.28] - 2026-07-19
+
+### Added
+- Discount debug capture: when `scraper.options.storeFailureScreenShotPath` is set, the scraper now saves a "filmstrip" (a screenshot every ~1.5s through the post-login wait) plus `discount-debug.log` (console errors, page errors, failed requests, and telebank/gatewayAPI response statuses + final URL) in the same directory. Lets us see WHY the SPA hangs instead of only the final spinner frame. No effect on normal runs.
+
 ## [1.0.27] - 2026-07-19
 
 ### Changed
