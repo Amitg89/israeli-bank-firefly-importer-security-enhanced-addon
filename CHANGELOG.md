@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.25] - 2026-07-19
+
+### Fixed
+- Discount login blocked in HA's Alpine Chromium (verified: config/credentials are correct and the same scrape succeeds on desktop Chrome). Added in-page stealth to the Discount scraper — spoofs navigator.webdriver/platform/languages/plugins, window.chrome, notification permission, and WebGL vendor/renderer, injected before page scripts so it also covers the post-login SPA where Telebank runs its bot checks. This hides the headless/Linux tells specific to the container browser.
+
 ## [1.0.24] - 2026-07-19
 
 ### Fixed
