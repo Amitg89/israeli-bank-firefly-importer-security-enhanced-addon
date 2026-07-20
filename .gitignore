@@ -10,6 +10,8 @@ Thumbs.db
 *.log
 
 # Local config files (never commit credentials!)
-config.yaml
-config.encrypted.yaml
+# Root-level only: add-on folders each have a legitimate config.yaml manifest.
+/config.yaml
+/config.encrypted.yaml
 *.local.yaml
+test-config/

@@ -1,0 +1,22 @@
+name: "Browserless Chromium"
+description: "Dedicated full-Chrome browser service for the Israeli bank importer. Exposes a Puppeteer/Playwright WebSocket endpoint on port 3000 so the importer can connect to a real Chrome instance instead of the bundled headless Chromium."
+version: "1.0.0"
+slug: browserless
+init: false
+arch:
+  - amd64
+  - aarch64
+startup: services
+boot: auto
+ports:
+  3000/tcp: 3000
+ports_description:
+  3000/tcp: "Browserless WebSocket / HTTP API"
+options:
+  token: ''
+  connection_timeout: 600000
+  max_concurrent_sessions: 2
+schema:
+  token: str?
+  connection_timeout: int
+  max_concurrent_sessions: int

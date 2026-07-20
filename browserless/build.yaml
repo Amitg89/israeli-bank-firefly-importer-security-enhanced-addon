@@ -1,0 +1,7 @@
+# The browserless/chromium image is published as a multi-arch manifest
+# (linux/amd64 + linux/arm64) under a single tag, so both arches point to
+# the same image reference. HA Supervisor selects the correct layer via the
+# manifest at pull time.
+build_from:
+  amd64: ghcr.io/browserless/chromium:latest
+  aarch64: ghcr.io/browserless/chromium:latest

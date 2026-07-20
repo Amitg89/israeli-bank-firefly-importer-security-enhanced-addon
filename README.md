@@ -1,4 +1,13 @@
-# Israeli Bank Firefly III Importer - Security Enhanced (Home Assistant Addon)
+# Israeli Bank Firefly III Importer - Security Enhanced (Home Assistant Add-ons)
+
+## Add-ons in this repository
+
+| Add-on | Description |
+|--------|-------------|
+| [Israeli Bank FireFly III Importer (Security Enhanced)](israeli-bank-firefly-importer/) | Main importer add-on — scrapes Israeli banks and imports transactions into Firefly III with AES-256-GCM encrypted credentials. |
+| [Browserless Chromium](browserless/) | Optional companion add-on — runs a dedicated Browserless Chrome service (WebSocket on port 3000) for the importer to connect to instead of its bundled headless Chromium. Targets the Discount Telebank SPA hang. |
+
+---
 
 Home Assistant addon for the security-enhanced Israeli Bank Firefly Importer.
 
