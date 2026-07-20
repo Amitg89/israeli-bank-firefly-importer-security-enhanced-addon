@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.30] - 2026-07-20
+
+### Added
+- Failure debug capture is now enabled automatically: on a failed scrape a failure screenshot plus the Discount filmstrip/`discount-debug.log` are written to a `debug/` folder next to the config file — no `storeFailureScreenShotPath` needed in the config.
+- On a failed scrape the tail of `discount-debug.log` (console errors, failed requests, telebank/gatewayAPI response statuses, final URL) is printed into the add-on log itself, so the hang cause is visible from the HA UI/API without file access to `/config`.
+
 ## [1.0.29] - 2026-07-20
 
 ### Added
