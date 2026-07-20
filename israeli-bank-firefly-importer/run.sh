@@ -18,6 +18,19 @@ export MASTER_PASSWORD=$(bashio::config 'master_password')
 export CRON=$(bashio::config 'cron')
 export LOG_LEVEL=$(bashio::config 'log_level')
 export SCRAPER_TIMEOUT=$(bashio::config 'scraper_timeout')
+export SCRAPER_BROWSER_WS_ENDPOINT=$(bashio::config 'browser_ws_endpoint')
+# bashio returns the literal string "null" for a missing/unset optional key
+# (e.g. right after upgrading, before the new option is saved) — treat as empty.
+if [ "${SCRAPER_BROWSER_WS_ENDPOINT}" = "null" ]; then
+    export SCRAPER_BROWSER_WS_ENDPOINT=""
+fi
+
+if [ -n "${SCRAPER_BROWSER_WS_ENDPOINT}" ]; then
+    _redacted=$(echo "${SCRAPER_BROWSER_WS_ENDPOINT}" | sed 's/token=[^&?]*/token=***/g')
+    bashio::log.info "Browser mode: remote (Browserless) at ${_redacted}"
+else
+    bashio::log.info "Browser mode: local Chromium"
+fi
 
 bashio::log.info "Config: ${CONFIG_FILE}, Firefly: ${FIREFLY_BASE_URL}, Cron: ${CRON}, ScraperTimeout: ${SCRAPER_TIMEOUT}ms"
 

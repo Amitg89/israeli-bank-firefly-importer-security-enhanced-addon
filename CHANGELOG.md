@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.29] - 2026-07-20
+
+### Added
+- New optional `browser_ws_endpoint` add-on option. When set to a WebSocket URL (e.g., `ws://homeassistant.local:3000?token=...`), the scraper connects to a remote Browserless Chrome instance over WebSocket instead of launching the bundled Chromium. This targets the Discount Telebank SPA hang by letting you point the scraper at a full, non-headless-flagged Chrome running in the companion Browserless add-on. Leaving the field blank preserves the previous local Chromium behavior unchanged.
+- `run.sh` now logs the active browser mode on startup: "Browser mode: remote (Browserless) at <endpoint>" (with any `token=…` query parameter redacted) or "Browser mode: local Chromium".
+
 ## [1.0.28] - 2026-07-19
 
 ### Added
