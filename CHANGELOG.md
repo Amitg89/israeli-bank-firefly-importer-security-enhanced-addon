@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.32] - 2026-07-21
+
+### Fixed
+- Balance reconciliation now targets bank accounts (`defaultAsset`) only. Credit cards report current-cycle balances while Firefly holds lifetime sums, so reconciling them produced huge bogus adjustments (blocked until now only by a Firefly API error).
+- Reconciliation transactions name the per-asset reconciliation account explicitly (`<account> reconciliation (<currency>)`), working around Firefly 6.6.6's inability to auto-resolve it (HTTP 500 "Attempt to read property type on null"). The account must exist once — see the importer repo's docs/reconciliation.md for the one-time setup.
+
 ## [1.0.31] - 2026-07-20
 
 ### Fixed
