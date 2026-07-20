@@ -24,16 +24,24 @@ COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Cache-bust: bump this when importer or scraper fixes are pushed so HA addon update re-clones
-ARG IMPORTER_CACHEBUST=2026-07-20-debug-log-surfacing
+ARG IMPORTER_CACHEBUST=2026-07-20-clone-scraper-master-branch
 RUN echo "Importer cache-bust: ${IMPORTER_CACHEBUST}"
 
-# Clone importer and install deps (scraper from GitHub has no src/ in pack, so we build it separately)
-RUN git clone --depth 1 https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git /app/importer \
+# Clone importer and install deps (scraper from GitHub has no src/ in pack, so we build it separately).
+# IMPORTANT: branches are pinned explicitly. The scraper fork's default branch on
+# GitHub is a stale `main`; all development happens on `master`. A bare
+# `git clone --depth 1` fetches the default branch, which silently deployed
+# months-old scraper code in every image up to and including 1.0.30.
+RUN git clone --depth 1 --branch main https://github.com/Amitg89/israeli-bank-firefly-importer-security-enhanced.git /app/importer \
     && cd /app/importer && npm install --ignore-scripts \
-    && git clone --depth 1 https://github.com/Amitg89/updated-Israeli-bank-scrapers.git /tmp/scraper \
+    && git clone --depth 1 --branch master https://github.com/Amitg89/updated-Israeli-bank-scrapers.git /tmp/scraper \
     && (cd /tmp/scraper && npm install --ignore-scripts && npm run clean && npm run build:js) \
     && cp -r /tmp/scraper/lib /app/importer/node_modules/israeli-bank-scrapers/ \
     && rm -rf /tmp/scraper \
+    # Build-time sanity check: the deployed scraper lib must contain the remote
+    # browser support. Fails the build loudly instead of shipping stale code.
+    && grep -q browserWSEndpoint /app/importer/node_modules/israeli-bank-scrapers/lib/scrapers/base-scraper-with-browser.js \
+    && grep -q discount-debug /app/importer/node_modules/israeli-bank-scrapers/lib/scrapers/discount.js \
     && apt-get purge -y git && apt-get autoremove -y
 
 # Run as root: HA add-ons are isolated containers, and root lets Chromium

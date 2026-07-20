@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.31] - 2026-07-20
+
+### Fixed
+- **ROOT CAUSE of every "fix didn't help" since 1.0.21:** the scraper fork's default branch on GitHub is a stale `main`, while all development lands on `master`. The Dockerfile's bare `git clone --depth 1` fetched the default branch, so every image up to 1.0.30 silently shipped months-old scraper code — the anti-bot stealth (1.0.23-1.0.25), the debug filmstrip (1.0.28) and the Browserless `browserWSEndpoint` support (1.0.29) were never actually deployed. Clones are now pinned with `--branch master` / `--branch main` explicitly, and the build fails loudly if the compiled scraper lib is missing the expected code.
+
 ## [1.0.30] - 2026-07-20
 
 ### Added
